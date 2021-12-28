@@ -1,3 +1,12 @@
+#
+# Copyright (c) 2021 Kian Kasad
+#
+# This file is distributed under a modified BSD license. See the provided
+# LICENSE file for details.
+#
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+
 CFLAGS ?= -g -O0
 CFLAGS += -Wall -pedantic
 
