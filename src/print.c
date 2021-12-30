@@ -25,7 +25,7 @@ static const char numtype_suffixes[] = {
 size_t print_tag(struct tag *tag)
 {
 	if (tag->name && *tag->name)
-		printf("%s:", tag->name);
+		printf("%s: ", tag->name);
 	print_payload(tag->type, &tag->payload);
 	return 0;
 }
@@ -42,7 +42,7 @@ size_t print_payload(enum tagtype type, union payload *payload)
 			out += printf("%ld%s", (long) payload->payload_struct.array[i], suffix); \
 			/* print comma after all but last element */ \
 			if (i < payload->payload_struct.size - 1) \
-			out += putchar(',') >= 0 ? 1 : 0; \
+			out += printf(", "); \
 		} \
 		out += putchar(']') >= 0 ? 1 : 0; \
 		return out; \
@@ -71,7 +71,7 @@ size_t print_payload(enum tagtype type, union payload *payload)
 				/* if not either the second-to-last or last
 				 * elements, append a comma */
 				if ( !(c->type == TAG_END || c->next->type == TAG_END) )
-					out += putchar(',') >= 0 ? 1 : 0;
+					out += printf(", ");
 			}
 
 			return out;
