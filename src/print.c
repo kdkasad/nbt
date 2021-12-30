@@ -62,7 +62,7 @@ size_t print_payload(enum tagtype type, union payload *payload)
 			if (i < payload->payload_struct.size - 1) \
 			out += printf(", "); \
 		} \
-		out += putchar(']') >= 0 ? 1 : 0; \
+		out += printf("]"); \
 		return out; \
 	}
 
@@ -99,14 +99,14 @@ size_t print_payload(enum tagtype type, union payload *payload)
 	case TAG_END:
 		;
 		indent_level--;
-		return putchar('}') >= 0 ? 1 : 0;
+		return printf("}");
 		break;
 
 
 	case TAG_COMPOUND:
 		{
 			size_t out = 0;
-			out += putchar('{') >= 0 ? 1 : 0;
+			out += printf("{");
 			indent_level++;
 
 			/* print child tags */
@@ -127,16 +127,16 @@ size_t print_payload(enum tagtype type, union payload *payload)
 	case TAG_LIST:
 		{
 			size_t out = 0;
-			out += putchar('[') >= 0 ? 1 : 0;
+			out += printf("[");
 
 			for (int i = 0; i < payload->tp_list.size; i++) {
 				out += print_payload(payload->tp_list.tagid, &payload->tp_list.list[i]);
 				/* print comma after all but last element */
 				if (i < payload->tp_list.size - 1)
-					out += putchar(',') >= 0 ? 1 : 0;
+					out += printf(",");
 			}
 
-			out += putchar(']') >= 0 ? 1 : 0;
+			out += printf("]");
 			return out;
 		}
 		break;
