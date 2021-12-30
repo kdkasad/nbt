@@ -14,6 +14,9 @@
 
 static size_t print_payload(enum tagtype type, union payload *payload);
 
+static unsigned int indent_level = 0;
+static char *indent_str = "    ";
+
 static const char numtype_suffixes[] = {
 	[TAG_BYTE] = 'b',
 	[TAG_SHORT] = 's',
@@ -24,10 +27,25 @@ static const char numtype_suffixes[] = {
 
 size_t print_tag(struct tag *tag)
 {
-	if (tag->name && *tag->name)
-		printf("%s: ", tag->name);
-	print_payload(tag->type, &tag->payload);
-	return 0;
+	size_t out = 0;
+
+	/* print newline before tags with names and end tags */
+	if ((tag->name && *tag->name) || tag->type == TAG_END) {
+		out += printf("\n");
+	}
+
+	/* print indent. if tag is an end tag, print one less indent than the
+	 * current indent level. */
+	for (int i = 0; i < indent_level - (tag->type == TAG_END ? 1 : 0); i++)
+		out += printf("%s", indent_str);
+
+	/* print tag name and separator */
+	if (tag->name && *tag->name) {
+		out += printf("%s: ", tag->name);
+	}
+
+	out += print_payload(tag->type, &tag->payload);
+	return out;
 }
 
 size_t print_payload(enum tagtype type, union payload *payload)
@@ -79,6 +97,8 @@ size_t print_payload(enum tagtype type, union payload *payload)
 		break;
 
 	case TAG_END:
+		;
+		indent_level--;
 		return putchar('}') >= 0 ? 1 : 0;
 		break;
 
@@ -87,6 +107,7 @@ size_t print_payload(enum tagtype type, union payload *payload)
 		{
 			size_t out = 0;
 			out += putchar('{') >= 0 ? 1 : 0;
+			indent_level++;
 
 			/* print child tags */
 			struct tag *c;
@@ -96,7 +117,7 @@ size_t print_payload(enum tagtype type, union payload *payload)
 				/* if not either the second-to-last or last
 				 * elements, append a comma */
 				if ( !(c->type == TAG_END || c->next->type == TAG_END) )
-					out += printf(", ");
+					out += printf(",");
 			}
 
 			return out;
