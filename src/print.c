@@ -8,6 +8,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "diag.h"
 #include "print.h"
@@ -93,8 +94,38 @@ size_t print_payload(enum tagtype type, union payload *payload)
 		break;
 
 	case TAG_STRING:
-		TODO("escape quotes");
-		return printf("\"%s\"", payload->tp_string.str);
+		{
+			size_t out;
+			char *escapedstr;
+			unsigned short estrpos = 0;
+			unsigned short nquotes = 0;
+
+			/* count number of quotes in string */
+			for (char *c = payload->tp_string.str; *c; c++)
+				if (*c == '"')
+					nquotes++;
+
+			/* allocate a block of memory the size of the length of
+			 * the string plus the number of quotes, so we can add
+			 * a backslack before each quote in the string. we also
+			 * add one byte at the end for a terminating null byte. */
+			escapedstr = malloc(payload->tp_string.len + nquotes + 1);
+
+			/* copy all characters from the original string to the
+			 * new string, inserting a backslash before each quote
+			 * character. */
+			for (char *c = payload->tp_string.str; *c; c++) {
+				if (*c == '"')
+					escapedstr[estrpos++] = '\\';
+				escapedstr[estrpos++] = *c;
+			}
+			escapedstr[estrpos] = '\0';
+
+			out = printf("\"%s\"", escapedstr);
+
+			free(escapedstr);
+			return out;
+		}
 		break;
 
 	case TAG_END:
