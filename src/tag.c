@@ -72,22 +72,27 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 	switch (type) {
 	case TAG_END:
 		break;
+
 	case TAG_BYTE:
 		READ_INT_VALUE(tp_byte);
 		break;
+
 	case TAG_SHORT:
 		READ_INT_VALUE(tp_short);
 		dest->tp_short.value = be16toh(dest->tp_short.value);
 		dest->tp_short.value = le16toh(dest->tp_short.value);
 		break;
+
 	case TAG_INT:
 		READ_INT_VALUE(tp_int);
 		dest->tp_int.value = be32toh(dest->tp_short.value);
 		break;
+
 	case TAG_LONG:
 		READ_INT_VALUE(tp_long);
 		dest->tp_long.value = be64toh(dest->tp_short.value);
 		break;
+
 	case TAG_FLOAT:
 		fread(bytes, 4, 1, stream);
 		// shift bytes to their respective positions
@@ -97,6 +102,7 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 			| ((uint32_t) bytes[2] << 8)
 			| ((uint32_t) bytes[3] << 0);
 		break;
+
 	case TAG_DOUBLE:
 		fread(bytes, 8, 1, stream);
 		// shift bytes to their respective positions
@@ -110,6 +116,7 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 						      | ((uint64_t) bytes[6] << 8)
 						      | ((uint64_t) bytes[0] << 0);
 		break;
+
 	case TAG_STRING:
 		/* read length */
 		fread(&dest->tp_string.len, sizeof(dest->tp_string.len), 1, stream);
@@ -249,7 +256,10 @@ void free_tag(struct tag *tag)
 		case TAG_FLOAT:
 		case TAG_DOUBLE:
 			/* These tags don't hold any dynamically-allocated
-			 * payloads, so do nothing. */
+			 * payloads, so do nothing.
+			 * These cases are still included here though so that
+			 * the compiler can warn about missing cases if new tag
+			 * types are added. */
 			break;
 	}
 

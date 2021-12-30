@@ -46,17 +46,42 @@ size_t print_payload(enum tagtype type, union payload *payload)
 		} \
 		out += putchar(']') >= 0 ? 1 : 0; \
 		return out; \
-	} \
+	}
 
 	switch (type) {
-	case TAG_BYTE: return PRINT_INTTYPE(payload->tp_byte.value); break;
-	case TAG_SHORT: return PRINT_INTTYPE(payload->tp_short.value); break;
-	case TAG_INT: return printf("%d", payload->tp_int.value); break;
-	case TAG_LONG: return PRINT_INTTYPE(payload->tp_long.value); break;
-	case TAG_FLOAT: return PRINT_FLOATTYPE(payload->tp_float.value); break;
-	case TAG_DOUBLE: return PRINT_FLOATTYPE(payload->tp_double.value); break;
-	case TAG_STRING: return printf("\"%s\"", payload->tp_string.str);
-	case TAG_END: return putchar('}') >= 0 ? 1 : 0; break;
+	case TAG_BYTE:
+		return PRINT_INTTYPE(payload->tp_byte.value);
+		break;
+
+	case TAG_SHORT:
+		return PRINT_INTTYPE(payload->tp_short.value);
+		break;
+
+	case TAG_INT:
+		return printf("%d", payload->tp_int.value);
+		break;
+
+	case TAG_LONG:
+		return PRINT_INTTYPE(payload->tp_long.value);
+		break;
+
+	case TAG_FLOAT:
+		return PRINT_FLOATTYPE(payload->tp_float.value);
+		break;
+
+	case TAG_DOUBLE:
+		return PRINT_FLOATTYPE(payload->tp_double.value);
+		break;
+
+	case TAG_STRING:
+		// TODO: escape quotes
+		return printf("\"%s\"", payload->tp_string.str);
+		break;
+
+	case TAG_END:
+		return putchar('}') >= 0 ? 1 : 0;
+		break;
+
 
 	case TAG_COMPOUND:
 		{
@@ -95,11 +120,21 @@ size_t print_payload(enum tagtype type, union payload *payload)
 		}
 		break;
 
-	case TAG_BYTE_ARRAY: PRINT_ARRAY(tp_byte_array, "b"); break;
-	case TAG_INT_ARRAY: PRINT_ARRAY(tp_int_array, ""); break;
-	case TAG_LONG_ARRAY: PRINT_ARRAY(tp_long_array, "l"); break;
+	case TAG_BYTE_ARRAY:
+		PRINT_ARRAY(tp_byte_array, "b");
+		break;
 
-	default: return 0; break;
+	case TAG_INT_ARRAY:
+		PRINT_ARRAY(tp_int_array, "");
+		break;
+
+	case TAG_LONG_ARRAY:
+		PRINT_ARRAY(tp_long_array, "l");
+		break;
+
+	default:
+		return 0;
+		break;
 	}
 
 #undef PRINT_INTTYPE
