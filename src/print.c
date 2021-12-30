@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 
+#include "diag.h"
 #include "print.h"
 #include "tag.h"
 
@@ -92,7 +93,7 @@ size_t print_payload(enum tagtype type, union payload *payload)
 		break;
 
 	case TAG_STRING:
-		// TODO: escape quotes
+		TODO("escape quotes");
 		return printf("\"%s\"", payload->tp_string.str);
 		break;
 
