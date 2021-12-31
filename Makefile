@@ -8,7 +8,7 @@
 #
 
 CFLAGS ?= -g -O0
-CFLAGS += -Wall -pedantic
+CFLAGS += -D_DEFAULT_SOURCE=1 -Wall -pedantic
 
 BIN  = nbt
 SRCS = $(wildcard src/*.c)
