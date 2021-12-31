@@ -24,6 +24,7 @@ static void print_usage(const char *argv0);
 
 static struct nbt_config cfg = {
 	.in = NULL,
+	.out = NULL,
 };
 
 int main(int argc, char *argv[])
@@ -49,16 +50,29 @@ int main(int argc, char *argv[])
 	}
 
 	/* exit after parsing all options so all errors are printed to user */
-	if (err)
+	if (err) {
+		fputs("See the usage information with the '-h' option.\n", stderr);
 		exit(RET_USER_ERROR);
+	}
 
-	/* input file given */
+	/* set input file */
 	if (optind < argc) {
 		if (!(cfg.in = fopen(argv[optind], "rb")))
 			error_at_line(RET_RUNTIME_ERROR, errno, __FILE__, __LINE__ - 1, "%s", argv[optind]);
 		optind++;
 	} else {
+		/* if none specified, default to stdin */
 		cfg.in = stdin;
+	}
+
+	/* set output file */
+	if (optind < argc) {
+		if (!(cfg.out = fopen(argv[optind], "w")))
+			error_at_line(RET_RUNTIME_ERROR, errno, __FILE__, __LINE__ - 1, "%s", argv[optind]);
+		optind++;
+	} else {
+		/* if none specified, default to stdout */
+		cfg.out = stdout;
 	}
 
 	/* attempt to read one tag */
@@ -66,7 +80,7 @@ int main(int argc, char *argv[])
 	if (!tag)
 		error_at_line(RET_RUNTIME_ERROR, 0, __FILE__, __LINE__ - 2, "no tag was read");
 
-	print_tag(tag);
+	print_tag(tag, cfg.out);
 
 	free(tag);
 	return 0;

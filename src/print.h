@@ -13,6 +13,6 @@
 #include <stddef.h>
 #include "tag.h"
 
-size_t print_tag(struct tag *tag);
+size_t print_tag(struct tag *tag, FILE *stream);
 
 #endif /* _PRINT_H_ */

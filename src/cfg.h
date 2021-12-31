@@ -15,6 +15,7 @@
 
 struct nbt_config {
 	FILE *in;
+	FILE *out;
 };
 
 #endif /* _CFG_H_ */

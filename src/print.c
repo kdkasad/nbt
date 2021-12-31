@@ -14,7 +14,7 @@
 #include "print.h"
 #include "tag.h"
 
-static size_t print_payload(enum tagtype type, union payload *payload);
+static size_t print_payload(enum tagtype type, union payload *payload, FILE *stream);
 
 static unsigned int indent_level = 0;
 static char *indent_str = "    ";
@@ -27,44 +27,44 @@ static const char numtype_suffixes[] = {
 	[TAG_DOUBLE] = 'd',
 };
 
-size_t print_tag(struct tag *tag)
+size_t print_tag(struct tag *tag, FILE *stream)
 {
 	size_t out = 0;
 
 	/* print newline before tags with names and end tags */
 	if ((tag->name && *tag->name) || tag->type == TAG_END) {
-		out += printf("\n");
+		out += fprintf(stream, "\n");
 	}
 
 	/* print indent. if tag is an end tag, print one less indent than the
 	 * current indent level. */
 	for (int i = 0; i < indent_level - (tag->type == TAG_END ? 1 : 0); i++)
-		out += printf("%s", indent_str);
+		out += fprintf(stream, "%s", indent_str);
 
 	/* print tag name and separator */
 	if (tag->name && *tag->name) {
-		out += printf("%s: ", tag->name);
+		out += fprintf(stream, "%s: ", tag->name);
 	}
 
-	out += print_payload(tag->type, &tag->payload);
+	out += print_payload(tag->type, &tag->payload, stream);
 	return out;
 }
 
-size_t print_payload(enum tagtype type, union payload *payload)
+size_t print_payload(enum tagtype type, union payload *payload, FILE *stream)
 {
-#define PRINT_INTTYPE(value) printf("%ld%c", (long) value, numtype_suffixes[type])
-#define PRINT_FLOATTYPE(value) printf("%f%c", value, numtype_suffixes[type])
+#define PRINT_INTTYPE(value) fprintf(stream, "%ld%c", (long) value, numtype_suffixes[type])
+#define PRINT_FLOATTYPE(value) fprintf(stream, "%f%c", value, numtype_suffixes[type])
 #define PRINT_ARRAY(payload_struct, suffix)  \
 	{ \
 		size_t out = 0; \
-		out += printf("[B;"); \
+		out += fprintf(stream, "[B;"); \
 		for (int i = 0; i < payload->payload_struct.size; i++) { \
-			out += printf("%ld%s", (long) payload->payload_struct.array[i], suffix); \
+			out += fprintf(stream, "%ld%s", (long) payload->payload_struct.array[i], suffix); \
 			/* print comma after all but last element */ \
 			if (i < payload->payload_struct.size - 1) \
-			out += printf(", "); \
+			out += fprintf(stream, ", "); \
 		} \
-		out += printf("]"); \
+		out += fprintf(stream, "]"); \
 		return out; \
 	}
 
@@ -78,7 +78,7 @@ size_t print_payload(enum tagtype type, union payload *payload)
 		break;
 
 	case TAG_INT:
-		return printf("%d", payload->tp_int.value);
+		return fprintf(stream, "%d", payload->tp_int.value);
 		break;
 
 	case TAG_LONG:
@@ -121,7 +121,7 @@ size_t print_payload(enum tagtype type, union payload *payload)
 			}
 			escapedstr[estrpos] = '\0';
 
-			out = printf("\"%s\"", escapedstr);
+			out = fprintf(stream, "\"%s\"", escapedstr);
 
 			free(escapedstr);
 			return out;
@@ -131,25 +131,25 @@ size_t print_payload(enum tagtype type, union payload *payload)
 	case TAG_END:
 		;
 		indent_level--;
-		return printf("}");
+		return fprintf(stream, "}");
 		break;
 
 
 	case TAG_COMPOUND:
 		{
 			size_t out = 0;
-			out += printf("{");
+			out += fprintf(stream, "{");
 			indent_level++;
 
 			/* print child tags */
 			struct tag *c;
 			/* skip last two */
 			for (c = payload->tp_compound.head; c; c = c->next) {
-				out += print_tag(c);
+				out += print_tag(c, stream);
 				/* if not either the second-to-last or last
 				 * elements, append a comma */
 				if ( !(c->type == TAG_END || c->next->type == TAG_END) )
-					out += printf(",");
+					out += fprintf(stream, ",");
 			}
 
 			return out;
@@ -159,16 +159,16 @@ size_t print_payload(enum tagtype type, union payload *payload)
 	case TAG_LIST:
 		{
 			size_t out = 0;
-			out += printf("[");
+			out += fprintf(stream, "[");
 
 			for (int i = 0; i < payload->tp_list.size; i++) {
-				out += print_payload(payload->tp_list.tagid, &payload->tp_list.list[i]);
+				out += print_payload(payload->tp_list.tagid, &payload->tp_list.list[i], stream);
 				/* print comma after all but last element */
 				if (i < payload->tp_list.size - 1)
-					out += printf(",");
+					out += fprintf(stream, ",");
 			}
 
-			out += printf("]");
+			out += fprintf(stream, "]");
 			return out;
 		}
 		break;
