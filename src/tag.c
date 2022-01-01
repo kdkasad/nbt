@@ -9,10 +9,10 @@
 
 #include <error.h>
 #include <errno.h>
-#include <endian.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "bits.h"
 #include "err.h"
 #include "print.h"
 #include "tag.h"
@@ -49,7 +49,7 @@ struct tag *read_tag(FILE *stream)
 
 	/* read name length */
 	fread(&tag->namelen, sizeof(tag->namelen), 1, stream);
-	tag->namelen = be16toh(tag->namelen);
+	tag->namelen = betoh16(tag->namelen);
 
 	/* read name */
 	tag->name = malloc(tag->namelen + 1);
@@ -79,18 +79,17 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 
 	case TAG_SHORT:
 		READ_INT_VALUE(tp_short);
-		dest->tp_short.value = be16toh(dest->tp_short.value);
-		dest->tp_short.value = le16toh(dest->tp_short.value);
+		dest->tp_short.value = betoh16(dest->tp_short.value);
 		break;
 
 	case TAG_INT:
 		READ_INT_VALUE(tp_int);
-		dest->tp_int.value = be32toh(dest->tp_short.value);
+		dest->tp_int.value = betoh32(dest->tp_int.value);
 		break;
 
 	case TAG_LONG:
 		READ_INT_VALUE(tp_long);
-		dest->tp_long.value = be64toh(dest->tp_short.value);
+		dest->tp_long.value = betoh64(dest->tp_long.value);
 		break;
 
 	case TAG_FLOAT:
@@ -120,7 +119,7 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 	case TAG_STRING:
 		/* read length */
 		fread(&dest->tp_string.len, sizeof(dest->tp_string.len), 1, stream);
-		dest->tp_string.len = be16toh(dest->tp_string.len);
+		dest->tp_string.len = betoh16(dest->tp_string.len);
 		/* allocate & read string */
 		dest->tp_string.str = malloc(dest->tp_string.len);
 		if (!dest->tp_string.str)
@@ -156,7 +155,7 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 			fread(&p->tagid, sizeof(p->tagid), 1, stream);
 			/* read list size */
 			fread(&p->size, sizeof(p->size), 1, stream);
-			p->size = be32toh(p->size);
+			p->size = betoh32(p->size);
 			/* allocate payload array */
 			p->list = calloc(p->size, sizeof(union payload));
 			/* read p->size elements */
@@ -172,7 +171,7 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 			struct tag_payload_byte_array *p = &dest->tp_byte_array;
 			/* read array size */
 			fread(&p->size, sizeof(p->size), 1, stream);
-			p->size = be32toh(p->size);
+			p->size = betoh32(p->size);
 			/* allocte array */
 			p->array = calloc(p->size, sizeof(*p->array));
 			/* read array elements */
@@ -186,14 +185,14 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 			struct tag_payload_int_array *p = &dest->tp_int_array;
 			/* read array size */
 			fread(&p->size, sizeof(p->size), 1, stream);
-			p->size = be32toh(p->size);
+			p->size = betoh32(p->size);
 			/* allocte array */
 			p->array = calloc(p->size, sizeof(*p->array));
 			/* read array elements */
 			fread(p->array, sizeof(*p->array), p->size, stream);
 			/* correct byte order of elements */
 			for (int i = 0; i < p->size; i++)
-				p->array[i] = be32toh(p->array[i]);
+				p->array[i] = betoh32(p->array[i]);
 		}
 		break;
 
@@ -203,14 +202,14 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 			struct tag_payload_long_array *p = &dest->tp_long_array;
 			/* read array size */
 			fread(&p->size, sizeof(p->size), 1, stream);
-			p->size = be32toh(p->size);
+			p->size = betoh32(p->size);
 			/* allocte array */
 			p->array = calloc(p->size, sizeof(*p->array));
 			/* read array elements */
 			fread(p->array, sizeof(*p->array), p->size, stream);
 			/* correct byte order of elements */
 			for (int i = 0; i < p->size; i++)
-				p->array[i] = be64toh(p->array[i]);
+				p->array[i] = betoh64(p->array[i]);
 		}
 		break;
 	}
