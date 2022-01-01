@@ -107,7 +107,7 @@ struct tag {
 	struct tag *next;
 };
 
-struct tag *read_tag(FILE *stream);
+struct tag *read_nbt_tag(FILE *stream);
 void free_tag(struct tag *tag);
 
 #endif /* _TAG_H_ */

@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* attempt to read one tag */
-	struct tag *tag = read_tag(cfg.in);
+	struct tag *tag = read_nbt_tag(cfg.in);
 	if (!tag)
 		error_at_line(RET_RUNTIME_ERROR, 0, __FILE__, __LINE__ - 2, "no tag was read");
 

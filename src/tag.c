@@ -18,15 +18,17 @@
 #include "print.h"
 #include "tag.h"
 
-static void read_payload(enum tagtype type, union payload *dest, FILE *stream);
+static void read_nbt_payload(enum tagtype type, union payload *dest, FILE *stream);
 
 /*
- * Read a tag from a file.
+ * Read an NBT tag from a file.
  *
  * Returns a dynamically-allocated tag. The returned tag must be freed by the
  * caller.
+ *
+ * stream: the file to read the tag from
  */
-struct tag *read_tag(FILE *stream)
+struct tag *read_nbt_tag(FILE *stream)
 {
 	/* attempt to read the new tag's type */
 	int c = fgetc(stream);
@@ -57,12 +59,19 @@ struct tag *read_tag(FILE *stream)
 	fread(tag->name, 1, tag->namelen, stream);
 	tag->name[tag->namelen] = '\0';
 
-	read_payload(tag->type, &tag->payload, stream);
+	read_nbt_payload(tag->type, &tag->payload, stream);
 
 	return tag;
 }
 
-void read_payload(enum tagtype type, union payload *dest, FILE *stream)
+/*
+ * Read the payload of an NBT tag from a file.
+ *
+ * type: type of tag for which the payload is being read
+ * dest: pointer to a payload object to store payload in
+ * stream: file object to read data from
+ */
+void read_nbt_payload(enum tagtype type, union payload *dest, FILE *stream)
 {
 #define READ_INT_VALUE(payload_type) \
 	fread(&dest->payload_type.value, sizeof(dest->payload_type.value), 1, stream);
@@ -134,9 +143,9 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 			struct tag_payload_compound *p = &dest->tp_compound;
 			/* read tags until an end tag is reached */
 			struct tag *t;
-			p->tail = p->head = t = read_tag(stream);
+			p->tail = p->head = t = read_nbt_tag(stream);
 			while (t->type != TAG_END) {
-				t = read_tag(stream);
+				t = read_nbt_tag(stream);
 				p->tail->next = t;
 				p->tail = p->tail->next;
 			}
@@ -156,7 +165,7 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 			p->list = calloc(p->size, sizeof(union payload));
 			/* read p->size elements */
 			for (int i = 0; i < p->size; i++) {
-				read_payload(p->tagid, &p->list[i], stream);
+				read_nbt_payload(p->tagid, &p->list[i], stream);
 			}
 		}
 		break;
@@ -211,6 +220,14 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 	}
 }
 
+/*
+ * Free all memory used by a tag.
+ *
+ * Any dynamically-allocated memory in the payload is freed first, then the tag
+ * itself is freed.
+ *
+ * tag: pointer to tag to free
+ */
 void free_tag(struct tag *tag)
 {
 	switch (tag->type) {
