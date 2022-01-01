@@ -94,5 +94,9 @@ void print_usage(const char *argv0)
 "\n"
 "Options:\n"
 "	-h	Print this usage information\n"
+"\n"
+"Copyright (c) " COPYRIGHT_YEAR " " COPYRIGHT_NAME "\n"
+"This program is distributed under a modified BSD license. See\n"
+"the LICENSE file provided with the source code for details.\n"
 	, argv0);
 }

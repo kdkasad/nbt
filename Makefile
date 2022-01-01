@@ -16,6 +16,10 @@ BIN  = nbt
 SRCS = $(wildcard src/*.c)
 OBJS = $(subst .c,.o,$(SRCS))
 
+COPYRIGHT_YEAR = 2021
+COPYRIGHT_NAME = Kian Kasad
+CPPFLAGS += -DCOPYRIGHT_YEAR="\"$(COPYRIGHT_YEAR)\"" -DCOPYRIGHT_NAME="\"$(COPYRIGHT_NAME)\""
+
 .PHONY: all
 all: $(BIN)
 
@@ -27,5 +31,5 @@ clean:
 	@rm -f $(BIN)
 
 $(BIN): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
