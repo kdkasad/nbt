@@ -33,8 +33,14 @@ CPPFLAGS ?=
 CPPFLAGS += -std=c99
 
 BIN  = nbt
-SRCS = $(wildcard src/*.c)
+SRCDIR = src
+SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS = $(subst .c,.o,$(SRCS))
+
+TBIN = test
+TESTDIR = tests
+TSRCS = $(wildcard $(TESTDIR)/*.c)
+TOBJS = $(filter-out $(SRCDIR)/main.o,$(OBJS)) $(subst .c,.o,$(TSRCS))
 
 COPYRIGHT_YEAR = 2021-2022
 COPYRIGHT_NAME = Kian Kasad
@@ -50,11 +56,18 @@ print-flags:
 	@echo "LDFLAGS:  $(LDFLAGS)"
 
 .PHONY: clean
-clean:
+clean: clean-tests
 	@echo Removing objects...
 	@rm -f $(OBJS)
 	@echo Removing binaries...
 	@rm -f $(BIN)
+
+.PHONY: clean-tests
+clean-tests:
+	@echo Removing test objects...
+	@rm -f $(filter $(TESTDIR)/%,$(TOBJS))
+	@echo Removing test binaries...
+	@rm -f $(TBIN)
 
 $(BIN): $(OBJS)
 	@echo "LINK	$@"
@@ -63,3 +76,11 @@ $(BIN): $(OBJS)
 .c.o:
 	@echo "CC	$<"
 	@$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+
+$(TBIN): $(TOBJS)
+	@echo "LINK	$@"
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+
+tests/%.o: tests/%.c
+	@echo "CC	$<"
+	@$(CC) $(CPPFLAGS) -iquote $(SRCDIR) $(CFLAGS) -c -o $@ $^
