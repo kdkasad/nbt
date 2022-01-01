@@ -8,7 +8,9 @@
 #
 
 CFLAGS ?= -g -O0
-CFLAGS += -D_DEFAULT_SOURCE=1 -Wall -pedantic
+CFLAGS += -Wall -pedantic
+CPPFLAGS ?=
+CPPFLAGS += -D_DEFAULT_SOURCE=1
 
 BIN  = nbt
 SRCS = $(wildcard src/*.c)
