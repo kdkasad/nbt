@@ -23,6 +23,12 @@ CPPFLAGS += -DCOPYRIGHT_YEAR="\"$(COPYRIGHT_YEAR)\"" -DCOPYRIGHT_NAME="\"$(COPYR
 .PHONY: all
 all: $(BIN)
 
+.PHONY: print-flags
+print-flags:
+	@echo "CFLAGS:   $(CFLAGS)"
+	@echo "CPPFLAGS: $(CPPFLAGS)"
+	@echo "LDFLAGS:  $(LDFLAGS)"
+
 .PHONY: clean
 clean:
 	@echo Removing objects...
@@ -31,5 +37,9 @@ clean:
 	@rm -f $(BIN)
 
 $(BIN): $(OBJS)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	@echo "LINK	$@"
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 
+.c.o:
+	@echo "CC	$<"
+	@$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
