@@ -16,6 +16,7 @@
 struct nbt_config {
 	FILE *in;
 	FILE *out;
+	bool print_whitespace;
 };
 
 #endif /* _CFG_H_ */

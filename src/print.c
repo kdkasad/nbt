@@ -7,6 +7,7 @@
  * SPDX-License-Identifier: BSD-2-Clause-Patent
  */
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -14,7 +15,7 @@
 #include "print.h"
 #include "tag.h"
 
-static size_t print_payload(enum tagtype type, union payload *payload, FILE *stream);
+static size_t print_payload(enum tagtype type, union payload *payload, bool print_whitespace, FILE *stream);
 
 static unsigned int indent_level = 0;
 static char *indent_str = "    ";
@@ -27,30 +28,32 @@ static const char numtype_suffixes[] = {
 	[TAG_DOUBLE] = 'd',
 };
 
-size_t print_tag(struct tag *tag, FILE *stream)
+size_t print_tag(struct tag *tag, bool print_whitespace, FILE *stream)
 {
 	size_t out = 0;
 
-	/* print newline before tags with names and end tags */
-	if ((tag->name && *tag->name) || tag->type == TAG_END) {
-		out += fprintf(stream, "\n");
+	if (print_whitespace) {
+		/* print newline before tags with names and end tags */
+		if ((tag->name && *tag->name) || tag->type == TAG_END) {
+			out += fprintf(stream, "\n");
+		}
+
+		/* print indent. if tag is an end tag, print one less indent than the
+		 * current indent level. */
+		for (int i = 0; i < indent_level - (tag->type == TAG_END ? 1 : 0); i++)
+			out += fprintf(stream, "%s", indent_str);
 	}
 
-	/* print indent. if tag is an end tag, print one less indent than the
-	 * current indent level. */
-	for (int i = 0; i < indent_level - (tag->type == TAG_END ? 1 : 0); i++)
-		out += fprintf(stream, "%s", indent_str);
-
-	/* print tag name and separator */
+	/* print tag name */
 	if (tag->name && *tag->name) {
-		out += fprintf(stream, "%s: ", tag->name);
+		out += fprintf(stream, "%s:%s", tag->name, (print_whitespace ? " " : ""));
 	}
 
-	out += print_payload(tag->type, &tag->payload, stream);
+	out += print_payload(tag->type, &tag->payload, print_whitespace, stream);
 	return out;
 }
 
-size_t print_payload(enum tagtype type, union payload *payload, FILE *stream)
+size_t print_payload(enum tagtype type, union payload *payload, bool print_whitespace, FILE *stream)
 {
 #define PRINT_INTTYPE(value) fprintf(stream, "%ld%c", (long) value, numtype_suffixes[type])
 #define PRINT_FLOATTYPE(value) fprintf(stream, "%f%c", value, numtype_suffixes[type])
@@ -62,7 +65,7 @@ size_t print_payload(enum tagtype type, union payload *payload, FILE *stream)
 			out += fprintf(stream, "%ld%s", (long) payload->payload_struct.array[i], suffix); \
 			/* print comma after all but last element */ \
 			if (i < payload->payload_struct.size - 1) \
-			out += fprintf(stream, ", "); \
+			out += fprintf(stream, ",%s", (print_whitespace ? " " : "")); \
 		} \
 		out += fprintf(stream, "]"); \
 		return out; \
@@ -145,7 +148,7 @@ size_t print_payload(enum tagtype type, union payload *payload, FILE *stream)
 			struct tag *c;
 			/* skip last two */
 			for (c = payload->tp_compound.head; c; c = c->next) {
-				out += print_tag(c, stream);
+				out += print_tag(c, print_whitespace, stream);
 				/* if not either the second-to-last or last
 				 * elements, append a comma */
 				if ( !(c->type == TAG_END || c->next->type == TAG_END) )
@@ -162,7 +165,7 @@ size_t print_payload(enum tagtype type, union payload *payload, FILE *stream)
 			out += fprintf(stream, "[");
 
 			for (int i = 0; i < payload->tp_list.size; i++) {
-				out += print_payload(payload->tp_list.tagid, &payload->tp_list.list[i], stream);
+				out += print_payload(payload->tp_list.tagid, &payload->tp_list.list[i], print_whitespace, stream);
 				/* print comma after all but last element */
 				if (i < payload->tp_list.size - 1)
 					out += fprintf(stream, ",");

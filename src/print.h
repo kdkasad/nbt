@@ -10,9 +10,10 @@
 #ifndef _PRINT_H_
 #define _PRINT_H_
 
-#include <stddef.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include "tag.h"
 
-size_t print_tag(struct tag *tag, FILE *stream);
+size_t print_tag(struct tag *tag, bool print_whitespace, FILE *stream);
 
 #endif /* _PRINT_H_ */

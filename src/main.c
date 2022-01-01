@@ -25,18 +25,22 @@ static void print_usage(const char *argv0);
 static struct nbt_config cfg = {
 	.in = NULL,
 	.out = NULL,
+	.print_whitespace = true,
 };
 
 int main(int argc, char *argv[])
 {
 	int c;
 	int err = 0; /* if nonzero, error ocurred parsing options */
-	static const char *optstring = ":h";
+	static const char *optstring = ":hs";
 	while ((c = getopt(argc, argv, optstring)) != -1) {
 		switch (c) {
 		case 'h':
 			print_usage(argv[0]);
 			exit(RET_NONE);
+			break;
+		case 's':
+			cfg.print_whitespace = false;
 			break;
 		case ':':
 			error_at_line(RET_NONE, 0, __FILE__, __LINE__ - 1, "option '-%c' requires an argument", optopt);
@@ -80,7 +84,7 @@ int main(int argc, char *argv[])
 	if (!tag)
 		error_at_line(RET_RUNTIME_ERROR, 0, __FILE__, __LINE__ - 2, "no tag was read");
 
-	print_tag(tag, cfg.out);
+	print_tag(tag, cfg.print_whitespace, cfg.out);
 
 	free(tag);
 	return 0;
@@ -94,6 +98,7 @@ void print_usage(const char *argv0)
 "\n"
 "Options:\n"
 "	-h	Print this usage information\n"
+"	-s	Don't print formatting whitespace\n"
 "\n"
 "Copyright (c) " COPYRIGHT_YEAR " " COPYRIGHT_NAME "\n"
 "This program is distributed under a modified BSD license. See\n"
