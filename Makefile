@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021 Kian Kasad
+# Copyright (c) 2021-2022 Kian Kasad
 #
 # This file is distributed under a modified BSD license. See the provided
 # LICENSE file for details.
@@ -16,7 +16,7 @@ BIN  = nbt
 SRCS = $(wildcard src/*.c)
 OBJS = $(subst .c,.o,$(SRCS))
 
-COPYRIGHT_YEAR = 2021
+COPYRIGHT_YEAR = 2021-2022
 COPYRIGHT_NAME = Kian Kasad
 CPPFLAGS += -DCOPYRIGHT_YEAR="\"$(COPYRIGHT_YEAR)\"" -DCOPYRIGHT_NAME="\"$(COPYRIGHT_NAME)\""
 

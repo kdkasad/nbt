@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Kian Kasad
+ * Copyright (c) 2021-2022 Kian Kasad
  *
  * This file is distributed under a modified BSD license. See the provided
  * LICENSE file for details.
