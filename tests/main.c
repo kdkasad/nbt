@@ -17,12 +17,12 @@ int test_str_h(void)
 {
 	struct vstr *s = vstr_create(0);
 
-	vstr_append(s, "Hello, world!\n");
+	vstr_append_printf(s, "Hello, world!\n");
 	assert(!strcmp("Hello, world!\n", s->s));
 	vstr_free(s);
 
 	s = vstr_create(10);
-	vstr_append(s, "This is more than %d characters\n", 10);
+	vstr_append_printf(s, "This is more than %d characters\n", 10);
 	assert(!strcmp("This is more than 10 characters\n", s->s));
 	vstr_free(s);
 
