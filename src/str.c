@@ -18,14 +18,14 @@
 #include "str.h"
 
 /*
- * Append text to a vstr object.
+ * Append text to a vstr object using printf format string.
  *
  * Usage is identical to sprintf(3) except a vstr is used as the destination
  * instead of a char pointer.
  *
  * Returns the number of characters appended to the vstr.
  */
-size_t vstr_append(struct vstr *vstr, const char *fmt, ...)
+size_t vstr_append_printf(struct vstr *vstr, const char *fmt, ...)
 {
 #define DEFAULT_SIZE 64
 

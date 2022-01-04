@@ -22,7 +22,7 @@ struct vstr {
 	char *s;
 };
 
-size_t vstr_append(struct vstr *vstr, const char *fmt, ...);
+size_t vstr_append_printf(struct vstr *vstr, const char *fmt, ...);
 struct vstr *vstr_create(size_t initsize);
 void vstr_free(struct vstr *vstr);
 
