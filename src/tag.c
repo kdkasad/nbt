@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "bits.h"
 #include "err.h"
@@ -66,9 +67,6 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 #define READ_INT_VALUE(payload_type) \
 	fread(&dest->payload_type.value, sizeof(dest->payload_type.value), 1, stream);
 
-	/* temporary byte array for reading float/double types */
-	uint8_t bytes[8] = { 0 };
-
 	switch (type) {
 	case TAG_END:
 		break;
@@ -93,27 +91,25 @@ void read_payload(enum tagtype type, union payload *dest, FILE *stream)
 		break;
 
 	case TAG_FLOAT:
-		fread(bytes, 4, 1, stream);
-		// shift bytes to their respective positions
-		*((uint32_t*)&dest->tp_float.value) = 0
-			| ((uint32_t) bytes[0] << 24)
-			| ((uint32_t) bytes[1] << 16)
-			| ((uint32_t) bytes[2] << 8)
-			| ((uint32_t) bytes[3] << 0);
+		{
+			/* read bytes into temporary unsigned int, then adjust
+			 * the byte order if needed and copy bytes to float */
+			uint32_t tmp;
+			fread(&tmp, 4, 1, stream);
+			tmp = betoh32(tmp);
+			memcpy(&dest->tp_double.value, &tmp, 4);
+		}
 		break;
 
 	case TAG_DOUBLE:
-		fread(bytes, 8, 1, stream);
-		// shift bytes to their respective positions
-		*((uint64_t*)&dest->tp_double.value) = 0
-						      | ((uint64_t) bytes[0] << 56)
-						      | ((uint64_t) bytes[1] << 48)
-						      | ((uint64_t) bytes[2] << 40)
-						      | ((uint64_t) bytes[3] << 32)
-						      | ((uint64_t) bytes[4] << 24)
-						      | ((uint64_t) bytes[5] << 16)
-						      | ((uint64_t) bytes[6] << 8)
-						      | ((uint64_t) bytes[0] << 0);
+		{
+			/* read bytes into temporary unsigned int, then adjust
+			 * the byte order if needed and copy bytes to double */
+			uint64_t tmp;
+			fread(&tmp, 8, 1, stream);
+			tmp = betoh64(tmp);
+			memcpy(&dest->tp_double.value, &tmp, 8);
+		}
 		break;
 
 	case TAG_STRING:
