@@ -10,7 +10,7 @@
 CFLAGS ?= -g -O0
 CFLAGS += -Wall -pedantic
 CPPFLAGS ?=
-CPPFLAGS += -D_DEFAULT_SOURCE=1
+CPPFLAGS += -std=c99
 
 BIN  = nbt
 SRCS = $(wildcard src/*.c)
