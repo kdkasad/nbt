@@ -15,6 +15,30 @@ The parser is written in C99-compliant C with no external dependencies.
 Simply run `make` to build the program. The resulting binary will be called
 `nbt`.
 
+### Optimization
+
+A build profile can be specified using the `BUILD` environment variable. The
+available options are listed below. The value defaults to `release` if none is
+specified.
+
+| Value     | Settings applied                                                |
+| ---       | ---                                                             |
+| `release` | Code is optimized for binary size and all symbols are stripped. |
+| `debug`   | Code is not optimized and debugging symbols are added.          |
+
+The `BUILD` variable can be set as an environment variable or as an argument to `make`:
+
+```sh
+$ export BUILD=release
+$ make
+...
+
+# or
+
+$ make BUILD=release
+...
+```
+
 ## Usage
 
 Run `nbt -h` to print usage information for the program.
@@ -25,8 +49,8 @@ pipeline on UNIX-like systems.
 
 ```sh
 # Template
-gzip -dc <compressed NBT file> | nbt [options]
+$ gzip -dc <compressed NBT file> | nbt [options]
 
 # Example
-gzip -dc level.dat | nbt
+$ gzip -dc level.dat | nbt
 ```

@@ -7,7 +7,27 @@
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 #
 
-CFLAGS ?= -g -O0
+
+
+# Set debug profile's *FLAGS
+CFLAGS_debug = -g -O0
+LDFLAGS_debug =
+
+# Set release profile's *FLAGS
+CFLAGS_release = -Os
+LDFLAGS_release = -s
+
+# If BUILD environment variable is defined, use the given build profile.
+# Otherwise, use 'release' profile only if *FLAGS are not already set in the
+# environment.
+ifdef BUILD
+CFLAGS += $(CFLAGS_$(BUILD))
+LDFLAGS += $(LDFLAGS_$(BUILD))
+else
+CFLAGS ?= $(CFLAGS_release)
+LDFLAGS ?= $(LDFLAGS_release)
+endif
+
 CFLAGS += -Wall -pedantic
 CPPFLAGS ?=
 CPPFLAGS += -std=c99
