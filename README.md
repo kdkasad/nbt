@@ -1,5 +1,5 @@
 # nbt
-A command-line NBT parser
+A command-line NBT (Named Binary Tag) parser
 
 ## Description
 
